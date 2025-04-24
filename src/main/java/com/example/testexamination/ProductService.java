@@ -1,5 +1,6 @@
 package com.example.testexamination;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,12 +11,13 @@ public class ProductService {
 
     private final ProductRepository productRepo;
 
+    @Autowired
     public ProductService(ProductRepository productRepo) {
         this.productRepo = productRepo;
     }
 
     public Product createProduct(Product product){
-        if(productRepo.productExist(product.getName())){
+        if(productRepo.existsByName(product.getName())){
             throw new IllegalStateException("Product already exist");
         }
         return productRepo.save(product);

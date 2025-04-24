@@ -6,9 +6,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+
+
+//UNIT-TESTS
+
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -19,9 +25,10 @@ class ProductServiceTest {
     @InjectMocks
     private ProductService productService;
 
-    @Test
+
+    @Test //test för att kolla om en produkt finns, om inte så skapas den
     public void testIfProductExistAnCreateNewIfNot(){
-        when(productRepo.productExist("computer")).thenReturn(false);
+        when(productRepo.existsByName("computer")).thenReturn(false);
 
         Product product = new Product(null, "computer", 200);
 
@@ -33,14 +40,30 @@ class ProductServiceTest {
         assertEquals(200, result.getPrice());
     }
 
-    @Test
+
+    @Test //test för att kolla om det går att hämta en produkt utifrån id
+    public void testGetProductById(){
+        //Arrange
+        Product product = new Product(1L, "computer", 200);
+        when(productRepo.findById(1L)).thenReturn(Optional.of(product));
+
+        //Act
+        Product result = productService.getProductById(1L).orElse(null);
+
+        //Assert
+        assertEquals("computer", result.getName());
+        verify(productRepo).findById(1L);
+    }
+
+    @Test //test om en produkt finns, så ska det komma en IllegalStateException
     public void shouldThrowIllegalStateExceptionIfProductExists(){
+        //Arrange
         Product product = new Product(null, "computer", 200);
 
-        when(productRepo.productExist("computer")).thenReturn(true);
+        when(productRepo.existsByName("computer")).thenReturn(true);
 
+        //Assert (+Act)
         assertThrows(IllegalStateException.class, () -> productService.createProduct(product));
-
         verify(productRepo, never()).save(any());
     }
 }
